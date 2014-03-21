@@ -40,8 +40,8 @@
 
 #define DEBUG
 #ifdef DEBUG
-  #define DEBUG_PRINT(x)     Serial.print (x)
-  #define DEBUG_PRINTDEC(x)     Serial.print (x, DEC)
+  #define DEBUG_PRINT(x)    Serial.print (x)
+  #define DEBUG_PRINTDEC(x) Serial.print (x, DEC)
   #define DEBUG_PRINTLN(x)  Serial.println (x)
 #else
   #define DEBUG_PRINT(x)
@@ -55,6 +55,11 @@ SmartThings smartthing(PIN_THING_RX, PIN_THING_TX, messageCallout);  // construc
  
 void setup()
 {
+  #ifdef DEBUG
+    // setup debug serial port
+    Serial.begin(9600);        
+  #endif
+  
   // Initialize Pins so relays are inactive at reset
   digitalWrite(Relay_1, RELAY_OFF);
   digitalWrite(Relay_2, RELAY_OFF);
@@ -76,6 +81,7 @@ void setup()
   pinMode(Relay_8, OUTPUT);    
   
   // Tell SmartThings all the relays are off
+  DEBUG_PRINTLN("Telling SmartThings all relays are off");  
   smartthing.send("relayoff1");
   smartthing.send("relayoff2");
   smartthing.send("relayoff3");
@@ -87,12 +93,7 @@ void setup()
   
   // Check that all relays are inactive at Reset  
   delay(2000); 
- 
-  #ifdef DEBUG
-    // setup debug serial port
-    Serial.begin(9600);        
-    DEBUG_PRINTLN("Ready...");  
-  #endif
+  DEBUG_PRINTLN("Ready...");  
 }
   
 void loop()
@@ -137,7 +138,16 @@ void messageCallout(String message)
     int relay = message.substring(8).toInt();
     changeRelayState(relay, RELAY_OFF);
   }  
-  
-  
-  
+  else if (message.startsWith ("relaystateal"))
+  {
+    // Tell SmartThings what's going on  
+    for (int relay=1;relay<9;relay++) 
+    {
+      int state = digitalRead(relay+3);
+      String newState = (state==RELAY_ON) ? "on" : "off";
+      String msg = "relay" + newState + String(relay);
+      DEBUG_PRINTLN("Sending message "+ msg + " to SmartThings");
+      smartthing.send(msg);    // send message to cloud
+    }
+  }    
 }

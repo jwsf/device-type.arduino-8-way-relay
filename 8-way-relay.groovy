@@ -27,42 +27,43 @@ metadata {
 		standardTile("relay1", "device.relay1", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff1", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
             state "off", label: '${name}', action: "RelayOn1", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
-            state "switching", label: '${name}', icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            state "switching", label: '${name}', action: "RelayOff1", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            
 		}
 		standardTile("relay2", "device.relay2", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff2", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn2", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
-            state "switching", label: '${name}', icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            state "switching", label: '${name}', action: "RelayOff2", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
 		}
 		standardTile("relay3", "device.relay3", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff3", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn3", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
-            state "switching", label: '${name}', icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            state "switching", label: '${name}', action: "RelayOff3", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
 		}
 		standardTile("relay4", "device.relay4", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff4", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn4", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
-            state "switching", label: '${name}', icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            state "switching", label: '${name}', action: "RelayOff4", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
 		}
 		standardTile("relay5", "device.relay5", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff5", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn5", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
-            state "switching", label: '${name}', icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            state "switching", label: '${name}', action: "RelayOff5", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
 		}
 		standardTile("relay6", "device.relay6", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff6", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn6", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
-            state "switching", label: '${name}', icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            state "switching", label: '${name}', action: "RelayOff6", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
 		}
 		standardTile("relay7", "device.relay7", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff7", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn7", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
-            state "switching", label: '${name}', icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            state "switching", label: '${name}', action: "RelayOff7", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
 		}
 		standardTile("relay8", "device.relay8", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff8", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn8", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
-            state "switching", label: '${name}', icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
+            state "switching", label: '${name}', action: "RelayOff8", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
 		}
         
 		main "relay1"
@@ -134,8 +135,9 @@ def RelayOff8() {
 def parse(String description) {
 
  	def value = zigbee.parse(description)?.text
+    log.debug "Received: " + value
     
-    if (value == "relayon1") {
+    if (value == "relayon1") { 
 	   	createEvent (name:"relay1", value:"on");
     } else
     if (value == "relayoff1") {
@@ -146,8 +148,7 @@ def parse(String description) {
     } else
     if (value == "relayoff2") {
 	   	createEvent (name:"relay2", value:"off");
-    } 
-    else 
+    } else 
     if (value == "relayon3") {
 	   	createEvent (name:"relay3", value:"on");
     } else
@@ -184,9 +185,12 @@ def parse(String description) {
     if (value == "relayoff8") {
 	   	createEvent (name:"relay8", value:"off");
     } 
-
 }
 
 
-
+def poll()
+{
+	log.debug "Poll - getting state of all relays"
+    zigbee.smartShield(text: "relaystateall").format()
+}
 

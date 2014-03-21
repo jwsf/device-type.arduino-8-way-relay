@@ -11,7 +11,7 @@ SmartThings Shield+Arduino+8-way Relay board Device-Type
   	 -  Name: RelayBoard
 	-Author: badgermanus@gmail.com
      -	Capabilities:
-			-- none --  
+			Poll
 	- Custom Capabilities:  RelayOn1, RelayOff1... through RelayOn8, RelayOff8 (see CustomCommands.png)   
 	
 			
