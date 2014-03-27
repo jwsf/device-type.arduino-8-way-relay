@@ -193,4 +193,3 @@ def poll()
 	log.debug "Poll - getting state of all relays"
     zigbee.smartShield(text: "relaystateall").format()
 }
-
