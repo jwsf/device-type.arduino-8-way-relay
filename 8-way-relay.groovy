@@ -22,6 +22,28 @@
  */ 
  
 metadata {
+	// Automatically generated. Make future change here.
+	definition (name: "Arduino Relay Board", author: "badgermanus@gmail.com") {
+		capability "Polling"
+
+		command "RelayOn1"
+		command "RelayOff1"
+		command "RelayOn2"
+		command "RelayOff2"
+		command "RelayOn3"
+		command "RelayOff3"
+		command "RelayOn4"
+		command "RelayOff4"
+		command "RelayOn5"
+		command "RelayOff5"
+		command "RelayOn6"
+		command "RelayOff6"
+		command "RelayOn7"
+		command "RelayOff7"
+		command "RelayOn8"
+		command "RelayOff8"
+	}
+
 	// tile definitions
 	tiles {
 		standardTile("relay1", "device.relay1", canChangeIcon: true, canChangeBackground: true) {
@@ -193,3 +215,4 @@ def poll()
 	log.debug "Poll - getting state of all relays"
     zigbee.smartShield(text: "relaystateall").format()
 }
+
