@@ -4,6 +4,10 @@
  *  Author: badgermanus@gmail.com
  *  Code: https://github.com/jwsf/device-type.arduino-8-way-relay
  *
+ * Requires the following libraries:
+ *  http://www.forward.com.au/pfod/ArduinoProgramming/elapsedMillis.zip
+ *  http://www.pjrc.com/teensy/td_libs_Time.html
+ *
  * Copyright (C) 2014 Jonathan Wilson  <badgermanus@gmail.com>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this 
  * software and associated documentation files (the "Software"), to deal in the Software 
@@ -22,6 +26,8 @@
  */
 #include <SoftwareSerial.h> 
 #include <SmartThings.h>
+#include <Time.h>
+#include <elapsedMillis.h>
  
 #define PIN_THING_RX    3
 #define PIN_THING_TX    2
@@ -29,14 +35,8 @@
 #define RELAY_ON 0
 #define RELAY_OFF 1
 
-#define Relay_1  4  // Arduino Digital I/O pin number
-#define Relay_2  5
-#define Relay_3  6
-#define Relay_4  7
-#define Relay_5  8 
-#define Relay_6  9
-#define Relay_7  10
-#define Relay_8  11
+elapsedMillis timer0;
+#define interval 60000 // For fail-safe timer
 
 #define DEBUG
 #ifdef DEBUG
@@ -52,6 +52,9 @@
  
 SmartThingsCallout_t messageCallout;    // call out function forward decalaration
 SmartThings smartthing(PIN_THING_RX, PIN_THING_TX, messageCallout);  // constructor
+
+
+time_t relayOnTimes[8];
  
 void setup()
 {
@@ -60,61 +63,58 @@ void setup()
     Serial.begin(9600);        
   #endif
   
-  // Initialize Pins so relays are inactive at reset
-  digitalWrite(Relay_1, RELAY_OFF);
-  digitalWrite(Relay_2, RELAY_OFF);
-  digitalWrite(Relay_3, RELAY_OFF);
-  digitalWrite(Relay_4, RELAY_OFF);  
-  digitalWrite(Relay_5, RELAY_OFF);
-  digitalWrite(Relay_6, RELAY_OFF);
-  digitalWrite(Relay_7, RELAY_OFF);
-  digitalWrite(Relay_8, RELAY_OFF);    
+  DEBUG_PRINTLN("Setting everything up...");  
+    
+  // Initialize pins so relays are off at reset, then set as outputs, then tell SmartThings they are off
+  for (int relay=1;relay<9;relay++) 
+  {
+    // Initialize pins so relays are off at reset
+    digitalWrite(relay+3, RELAY_OFF);          // +3 because the relay pins start at pin 4
+
+    // THEN set pins as outputs 
+    pinMode(relay+3, OUTPUT);                  // +3 because the relay pins start at pin 4
+
+    // Tell SmartThings all the relays are off
+    smartthing.send("relayoff"+String(relay));
+  }  
   
-  // THEN set pins as outputs 
-  pinMode(Relay_1, OUTPUT);   
-  pinMode(Relay_2, OUTPUT);  
-  pinMode(Relay_3, OUTPUT);  
-  pinMode(Relay_4, OUTPUT);    
-  pinMode(Relay_5, OUTPUT);   
-  pinMode(Relay_6, OUTPUT);  
-  pinMode(Relay_7, OUTPUT);  
-  pinMode(Relay_8, OUTPUT);    
-  
-  // Tell SmartThings all the relays are off
-  DEBUG_PRINTLN("Telling SmartThings all relays are off");  
-  smartthing.send("relayoff1");
-  smartthing.send("relayoff2");
-  smartthing.send("relayoff3");
-  smartthing.send("relayoff4");
-  smartthing.send("relayoff5");
-  smartthing.send("relayoff6");
-  smartthing.send("relayoff7");
-  smartthing.send("relayoff8");
-  
-  // Check that all relays are inactive at Reset  
+  setTime(8,29,0,1,1,11); // set time to Saturday 8:29:00am Jan 1 2011 so the time stuff works (relatively)
   delay(2000); 
   DEBUG_PRINTLN("Ready...");  
+  
+  timer0 = 0; // clear the elapsed timer at the end of startup
 }
   
 void loop()
 {
   // run smartthing logic
   smartthing.run();
+  
+ /* if (timer0 > interval) 
+  {
+    timer0 -= interval; //reset the timer
+    autoTurnOffRelays();
+  }*/
 }
 
 void changeRelayState(int relay, int state)
 {
   // Switch the relay
+  String newState = (state==RELAY_ON) ? "on" : "off";
   DEBUG_PRINT("Switching relay ");
   DEBUG_PRINT(relay);
-  DEBUG_PRINTLN((state==RELAY_ON) ? " on" : " off");
+  DEBUG_PRINT(" ");
+  DEBUG_PRINTLN(newState);
   digitalWrite(3+relay, state);// set the Relay - +3 because the relay pins start at pin 4
 
   // Tell SmartThings what's going on  
-  String newState = (state==RELAY_ON) ? "on" : "off";
+/*   REMOVED - THIS MAKES THINGS REALLY UNRELIABLE
+
   String msg = "relay" + newState + String(relay);
-  DEBUG_PRINTLN("Sending message "+ msg + " to SmartThings");
-  smartthing.send(msg);    // send message to cloud
+  DEBUG_PRINT("Sending message '");
+  DEBUG_PRINT(msg);
+  DEBUG_PRINTLN("' to SmartThings");  
+//  smartthing.send(msg);    // send message to cloud*/
 }
 
 void messageCallout(String message)
@@ -130,24 +130,65 @@ void messageCallout(String message)
 
   if (message.startsWith ("relayon"))
   {
+    // Turn on the relay
     int relay = message.substring(7).toInt();
     changeRelayState(relay, RELAY_ON);
+    
+    // Record when it was turned on so was can potentially do a fail-safe turn-off
+    relayOnTimes[relay-1] = now();
   } 
   else if (message.startsWith ("relayoff"))
   {
+    // Turn off the relay
     int relay = message.substring(8).toInt();
     changeRelayState(relay, RELAY_OFF);
   }  
-  else if (message.startsWith ("relaystateal"))
+  else if (message.startsWith ("relaystateall"))
   {
+    reportRelayStatusToSmartThings();
+  }    
+}
+
+void reportRelayStatusToSmartThings()
+{
+  // Tell SmartThings what's going on  
+  for (int relay=1;relay<9;relay++) 
+  {
+    int state = digitalRead(relay+3);  // +3 because the relay pins start at pin 4
+    String stateString = (state==RELAY_ON) ? "on" : "off";
+    String msg = "relay" + stateString + String(relay);
+    DEBUG_PRINTLN("Sending message "+ msg + " to SmartThings");
+    smartthing.send(msg);    // send message to cloud
+  }
+}
+
+void autoTurnOffRelays()
+{
+    DEBUG_PRINTLN("Checking to see if any relays need turning off automatically (fail safe)");
+    
+    // See if it needs turning off
+    DEBUG_PRINT("Now: ");    
+    DEBUG_PRINTLN(String(now()));
+    
     // Tell SmartThings what's going on  
     for (int relay=1;relay<9;relay++) 
     {
-      int state = digitalRead(relay+3);
-      String newState = (state==RELAY_ON) ? "on" : "off";
-      String msg = "relay" + newState + String(relay);
-      DEBUG_PRINTLN("Sending message "+ msg + " to SmartThings");
-      smartthing.send(msg);    // send message to cloud
+      DEBUG_PRINTLN("Checking relay: " + String(relay));
+      int state = digitalRead(relay+3);  // +3 because the relay pins start at pin 4
+      if (state==RELAY_ON)
+      {
+        // See if it needs turning off
+        DEBUG_PRINT("Relay on time: ");
+        DEBUG_PRINTLN(String(relayOnTimes[relay-1]));
+        
+        if (relayOnTimes[relay-1]+10 <  now())
+        {
+            DEBUG_PRINTLN("Fail-safe turn off!");
+            changeRelayState(relay, RELAY_OFF);
+        }          
+      } 
     }
-  }    
+    
+    // Keep ST in sync
+    reportRelayStatusToSmartThings();
 }
