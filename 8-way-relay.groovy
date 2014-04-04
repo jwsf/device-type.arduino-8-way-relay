@@ -25,7 +25,18 @@ metadata {
 	// Automatically generated. Make future change here.
 	definition (name: "Arduino Relay Board", author: "badgermanus@gmail.com") {
 		capability "Polling"
-
+        capability "Refresh"
+        
+        /*attribute "relay1", "enum", ["on","off"]
+        attribute "relay2", "enum", ["on","off"]
+        attribute "relay3", "enum", ["on","off"]
+        attribute "relay4", "enum", ["on","off"]
+        attribute "relay5", "enum", ["on","off"]
+        attribute "relay6", "enum", ["on","off"]
+        attribute "relay7", "enum", ["on","off"]
+        attribute "relay8", "enum", ["on","off"]*/
+        
+         
 		command "RelayOn1"
 		command "RelayOff1"
 		command "RelayOn2"
@@ -42,11 +53,12 @@ metadata {
 		command "RelayOff7"
 		command "RelayOn8"
 		command "RelayOff8"
+        
 	}
 
 	// tile definitions
 	tiles {
-		/*standardTile("relay1", "device.relay1", canChangeIcon: true, canChangeBackground: true) {
+		standardTile("relay1", "device.relay1", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff1", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
             state "off", label: '${name}', action: "RelayOn1", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
             state "switching", label: '${name}', action: "RelayOff1", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
@@ -86,7 +98,7 @@ metadata {
 			state "on", label: '${name}', action: "RelayOff8", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn8", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
             state "switching", label: '${name}', action: "RelayOff8", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
-		}*/
+		}/*
         
         standardTile("relay1", "device.relay1", canChangeIcon: true, canChangeBackground: true) {
 			state "on", label: '${name}', action: "RelayOff1", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
@@ -128,7 +140,7 @@ metadata {
 			state "on", label: '${name}', action: "RelayOff8", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
 			state "off", label: '${name}', action: "RelayOn8", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
             
-		}
+		}*/
         
         
 		main "relay1"
@@ -145,7 +157,10 @@ metadata {
 }
  
 
- 
+// Commands
+// =====================
+
+
 def RelayOn1() {
 	zigbee.smartShield(text: "relayon1").format()
 } 
@@ -194,8 +209,20 @@ def RelayOn8() {
 def RelayOff8() {
 	zigbee.smartShield(text: "relayoff8").format()
 }
+def poll()
+{
+	log.debug "Poll - getting state of all relays"
+    zigbee.smartShield(text: "relaystateall").format()
+}
+def refresh()
+{
+	log.debug "Refresh - getting state of all relays"
+    zigbee.smartShield(text: "relaystateall").format()
+}
 
  
+// Arduino event handlers
+// =================================
  
 def parse(String description) {
 
@@ -203,59 +230,55 @@ def parse(String description) {
     log.debug "Received: " + value
     
     if (value == "relayon1") { 
-	   	createEvent (name:"relay1", value:"on");
+	   	createEvent (name:"relay1", value:"on", isStateChange:true)
     } else
     if (value == "relayoff1") {
-	   	createEvent (name:"relay1", value:"off");
+	   	createEvent (name:"relay1", value:"off", isStateChange:true)
     } else 
     if (value == "relayon2") {
-	   	createEvent (name:"relay2", value:"on");
+	   	createEvent (name:"relay2", value:"on", isStateChange:true)
     } else
     if (value == "relayoff2") {
-	   	createEvent (name:"relay2", value:"off");
+	   	createEvent (name:"relay2", value:"off", isStateChange:true)
     } else 
     if (value == "relayon3") {
-	   	createEvent (name:"relay3", value:"on");
+	   	createEvent (name:"relay3", value:"on", isStateChange:true)
     } else
     if (value == "relayoff3") {
-	   	createEvent (name:"relay3", value:"off");
+	   	createEvent (name:"relay3", value:"off", isStateChange:true)
     } else 
     if (value == "relayon4") {
-	   	createEvent (name:"relay4", value:"on");
+	   	createEvent (name:"relay4", value:"on", isStateChange:true)
     } else
     if (value == "relayoff4") {
-	   	createEvent (name:"relay4", value:"off");
+	   	createEvent (name:"relay4", value:"off", isStateChange:true)
     } else 
     if (value == "relayon5") {
-	   	createEvent (name:"relay5", value:"on");
+	   	createEvent (name:"relay5", value:"on", isStateChange:true)
     } else
     if (value == "relayoff5") {
-	   	createEvent (name:"relay5", value:"off");
+	   	createEvent (name:"relay5", value:"off", isStateChange:true)
     } else 
     if (value == "relayon6") {
-	   	createEvent (name:"relay6", value:"on");
+	   	createEvent (name:"relay6", value:"on", isStateChange:true)
     } else
     if (value == "relayoff6") {
-	   	createEvent (name:"relay6", value:"off");
+	   	createEvent (name:"relay6", value:"off", isStateChange:true)
     } else 
     if (value == "relayon7") {
-	   	createEvent (name:"relay7", value:"on");
+	   	createEvent (name:"relay7", value:"on", isStateChange:true)
     } else
     if (value == "relayoff7") {
-	   	createEvent (name:"relay7", value:"off");
+	   	createEvent (name:"relay7", value:"off", isStateChange:true)
     } else 
     if (value == "relayon8") {
-	   	createEvent (name:"relay8", value:"on");
+	   	createEvent (name:"relay8", value:"on", isStateChange:true)
     } else
     if (value == "relayoff8") {
-	   	createEvent (name:"relay8", value:"off");
+	   	createEvent (name:"relay8", value:"off", isStateChange:true)
     } 
 }
 
 
-def poll()
-{
-	log.debug "Poll - getting state of all relays"
-    zigbee.smartShield(text: "relaystateall").format()
-}
+
 

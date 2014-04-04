@@ -36,7 +36,7 @@
 #define RELAY_OFF 1
 
 elapsedMillis timer0;
-#define interval 60000 // For fail-safe timer
+#define interval 60000 // For fail-safe timer - check for relays which need to be turned off every minute
 
 #define DEBUG
 #ifdef DEBUG
@@ -90,7 +90,7 @@ void loop()
   // run smartthing logic
   smartthing.run();
   
- /* if (timer0 > interval) 
+  /*if (timer0 > interval) 
   {
     timer0 -= interval; //reset the timer
     autoTurnOffRelays();
@@ -108,13 +108,11 @@ void changeRelayState(int relay, int state)
   digitalWrite(3+relay, state);// set the Relay - +3 because the relay pins start at pin 4
 
   // Tell SmartThings what's going on  
-/*   REMOVED - THIS MAKES THINGS REALLY UNRELIABLE
-
   String msg = "relay" + newState + String(relay);
   DEBUG_PRINT("Sending message '");
   DEBUG_PRINT(msg);
   DEBUG_PRINTLN("' to SmartThings");  
-//  smartthing.send(msg);    // send message to cloud*/
+  smartthing.send(msg);    // send message to cloud
 }
 
 void messageCallout(String message)
@@ -145,21 +143,21 @@ void messageCallout(String message)
   }  
   else if (message.startsWith ("relaystateall"))
   {
-    reportRelayStatusToSmartThings();
+    // Tell SmartThings what's going on  
+    for (int relay=1;relay<9;relay++) 
+    {
+      reportRelayStatusToSmartThings(relay);
+    }
   }    
 }
 
-void reportRelayStatusToSmartThings()
+void reportRelayStatusToSmartThings(int relay)
 {
-  // Tell SmartThings what's going on  
-  for (int relay=1;relay<9;relay++) 
-  {
     int state = digitalRead(relay+3);  // +3 because the relay pins start at pin 4
     String stateString = (state==RELAY_ON) ? "on" : "off";
     String msg = "relay" + stateString + String(relay);
-    DEBUG_PRINTLN("Sending message "+ msg + " to SmartThings");
+    DEBUG_PRINTLN("Sending message '" + msg + "' to SmartThings");
     smartthing.send(msg);    // send message to cloud
-  }
 }
 
 void autoTurnOffRelays()
@@ -183,12 +181,16 @@ void autoTurnOffRelays()
         
         if (relayOnTimes[relay-1]+10 <  now())
         {
-            DEBUG_PRINTLN("Fail-safe turn off!");
-            changeRelayState(relay, RELAY_OFF);
+          DEBUG_PRINTLN("Fail-safe turn off!");
+          changeRelayState(relay, RELAY_OFF);
+          
+          // Keep ST switch in sync
+          reportRelayStatusToSmartThings(relay);
+          
+          // Report auto-turn off event to ST
+          smartthing.send("relayautooff");    // send message to cloud
         }          
       } 
+      
     }
-    
-    // Keep ST in sync
-    reportRelayStatusToSmartThings();
-}
+  }
