@@ -55,6 +55,7 @@ SmartThings smartthing(PIN_THING_RX, PIN_THING_TX, messageCallout);  // construc
 
 
 time_t relayOnTimes[8];
+int relayAutoOffAfterMinutes[8];
  
 void setup()
 {
@@ -90,29 +91,31 @@ void loop()
   // run smartthing logic
   smartthing.run();
   
-  /*if (timer0 > interval) 
+  if (timer0 > interval) 
   {
     timer0 -= interval; //reset the timer
     autoTurnOffRelays();
-  }*/
+  }
 }
 
 void changeRelayState(int relay, int state)
 {
+  if ((relay<1) | (relay>8))
+  {
+    DEBUG_PRINTLN("Invalid relay number sent");
+    return; 
+  }
+  
   // Switch the relay
-  String newState = (state==RELAY_ON) ? "on" : "off";
-  DEBUG_PRINT("Switching relay ");
-  DEBUG_PRINT(relay);
-  DEBUG_PRINT(" ");
-  DEBUG_PRINTLN(newState);
   digitalWrite(3+relay, state);// set the Relay - +3 because the relay pins start at pin 4
 
-  // Tell SmartThings what's going on  
-  String msg = "relay" + newState + String(relay);
+  // Tell SmartThings what's going on 
+  char buffer[32];
+  snprintf(buffer, 32, "relay%s%i", (state==RELAY_ON) ? "on" : "off", relay);
   DEBUG_PRINT("Sending message '");
-  DEBUG_PRINT(msg);
+  DEBUG_PRINT(buffer);                         
   DEBUG_PRINTLN("' to SmartThings");  
-  smartthing.send(msg);    // send message to cloud
+  smartthing.send(buffer);    // send message to cloud
 }
 
 void messageCallout(String message)
@@ -126,11 +129,33 @@ void messageCallout(String message)
     }
   #endif
 
-  if (message.startsWith ("relayon"))
+  if (message.startsWith ("push"))
+  {
+    // Get and check the relay number
+    int relay = message.substring(4).toInt();
+    if ((relay<1) | (relay>8))
+    {
+      DEBUG_PRINTLN("Invalid relay number sent");
+      return; 
+    }
+    
+    // Turn on the relay    
+    digitalWrite(3+relay, RELAY_ON);// set the Relay - +3 because the relay pins start at pin 4
+    delay(100);
+    digitalWrite(3+relay, RELAY_OFF);// set the Relay - +3 because the relay pins start at pin 4
+  } 
+  else  if (message.startsWith ("relayon"))
   {
     // Turn on the relay
-    int relay = message.substring(7).toInt();
+    int relay = message.substring(7,8).toInt();
     changeRelayState(relay, RELAY_ON);
+    
+    // Get the auto-off time
+    int autoOffMinutes = message.substring(9).toInt();
+    DEBUG_PRINT("Auto off after ");
+    DEBUG_PRINT (autoOffMinutes);
+    DEBUG_PRINTLN(" minutes");
+    relayAutoOffAfterMinutes[relay-1] = autoOffMinutes;
     
     // Record when it was turned on so was can potentially do a fail-safe turn-off
     relayOnTimes[relay-1] = now();
@@ -148,16 +173,22 @@ void messageCallout(String message)
     {
       reportRelayStatusToSmartThings(relay);
     }
-  }    
+  }   
+  else if (message.startsWith ("autorelayoff1"))
+  {
+     DEBUG_PRINTLN ("Received config param"); 
+  }
 }
 
 void reportRelayStatusToSmartThings(int relay)
 {
     int state = digitalRead(relay+3);  // +3 because the relay pins start at pin 4
-    String stateString = (state==RELAY_ON) ? "on" : "off";
-    String msg = "relay" + stateString + String(relay);
-    DEBUG_PRINTLN("Sending message '" + msg + "' to SmartThings");
-    smartthing.send(msg);    // send message to cloud
+    char buffer[32];
+    snprintf(buffer, 32, "relay%s%i", (state==RELAY_ON) ? "on" : "off", relay);
+    DEBUG_PRINT("Sending message '");
+    DEBUG_PRINT(buffer);
+    DEBUG_PRINTLN("' to SmartThings");
+    smartthing.send(buffer);    // send message to cloud
 }
 
 void autoTurnOffRelays()
@@ -165,7 +196,7 @@ void autoTurnOffRelays()
     DEBUG_PRINTLN("Checking to see if any relays need turning off automatically (fail safe)");
     
     // See if it needs turning off
-    DEBUG_PRINT("Now: ");    
+    DEBUG_PRINT("Time now: ");    
     DEBUG_PRINTLN(String(now()));
     
     // Tell SmartThings what's going on  
@@ -176,21 +207,27 @@ void autoTurnOffRelays()
       if (state==RELAY_ON)
       {
         // See if it needs turning off
-        DEBUG_PRINT("Relay on time: ");
-        DEBUG_PRINTLN(String(relayOnTimes[relay-1]));
+        int mins = relayAutoOffAfterMinutes[relay-1];
+        DEBUG_PRINT("Should be turned off after ");
+        DEBUG_PRINT(mins);
+        DEBUG_PRINTLN(" minutes");
         
-        if (relayOnTimes[relay-1]+10 <  now())
+        // Skip if auto-ff is set to zero minutes - this means it has not been set
+        if (mins == 0 ) continue;
+        
+        DEBUG_PRINT("Time relay was turned on: ");
+        DEBUG_PRINTLN(relayOnTimes[relay-1]);
+        
+        if (relayOnTimes[relay-1]+(mins*60) <  now())
         {
           DEBUG_PRINTLN("Fail-safe turn off!");
           changeRelayState(relay, RELAY_OFF);
-          
-          // Keep ST switch in sync
-          reportRelayStatusToSmartThings(relay);
-          
+           
           // Report auto-turn off event to ST
-          smartthing.send("relayautooff");    // send message to cloud
+          char buffer[32];
+          snprintf(buffer, 32, "relayautooff%i", relay);
+          smartthing.send(buffer);    // send message to cloud
         }          
       } 
-      
     }
   }

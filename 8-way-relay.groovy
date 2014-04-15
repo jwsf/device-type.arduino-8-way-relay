@@ -22,21 +22,25 @@
  */ 
  
 metadata {
+
+     preferences {
+        input("autorelayoff1", "number", title: "Relay 1 auto-off", description: "Minutes until auto switch off?", required: false)
+        input("autorelayoff2", "number", title: "Relay 2 auto-off", description: "Minutes until auto switch off?", required: false)
+        input("autorelayoff3", "number", title: "Relay 3 auto-off", description: "Minutes until auto switch off?", required: false)
+        input("autorelayoff4", "number", title: "Relay 4 auto-off", description: "Minutes until auto switch off?", required: false)
+        input("autorelayoff5", "number", title: "Relay 5 auto-off", description: "Minutes until auto switch off?", required: false)
+        input("autorelayoff6", "number", title: "Relay 6 auto-off", description: "Minutes until auto switch off?", required: false)
+        input("autorelayoff7", "number", title: "Relay 7 auto-off", description: "Minutes until auto switch off?", required: false)
+        input("autorelayoff8", "number", title: "Relay 8 auto-off", description: "Minutes until auto switch off?", required: false)
+        
+    }
+
+
 	// Automatically generated. Make future change here.
 	definition (name: "Arduino Relay Board", author: "badgermanus@gmail.com") {
 		capability "Polling"
         capability "Refresh"
-        
-        /*attribute "relay1", "enum", ["on","off"]
-        attribute "relay2", "enum", ["on","off"]
-        attribute "relay3", "enum", ["on","off"]
-        attribute "relay4", "enum", ["on","off"]
-        attribute "relay5", "enum", ["on","off"]
-        attribute "relay6", "enum", ["on","off"]
-        attribute "relay7", "enum", ["on","off"]
-        attribute "relay8", "enum", ["on","off"]*/
-        
-         
+                
 		command "RelayOn1"
 		command "RelayOff1"
 		command "RelayOn2"
@@ -54,6 +58,14 @@ metadata {
 		command "RelayOn8"
 		command "RelayOff8"
         
+        command "Push1"
+        command "Push2"
+        command "Push3"
+        command "Push4"
+        command "Push5"
+        command "Push6"
+        command "Push7"
+        command "Push8"
 	}
 
 	// tile definitions
@@ -98,53 +110,13 @@ metadata {
 			state "on", label: '${name}', action: "RelayOff8", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"switching"
 			state "off", label: '${name}', action: "RelayOn8", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"switching"
             state "switching", label: '${name}', action: "RelayOff8", icon: "st.switches.switch.on", backgroundColor: "#ff8d00"
-		}/*
-        
-        standardTile("relay1", "device.relay1", canChangeIcon: true, canChangeBackground: true) {
-			state "on", label: '${name}', action: "RelayOff1", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
-            state "off", label: '${name}', action: "RelayOn1", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
-            
-            
 		}
-		standardTile("relay2", "device.relay2", canChangeIcon: true, canChangeBackground: true) {
-			state "on", label: '${name}', action: "RelayOff2", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
-			state "off", label: '${name}', action: "RelayOn2", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
-            
-		}
-		standardTile("relay3", "device.relay3", canChangeIcon: true, canChangeBackground: true) {
-			state "on", label: '${name}', action: "RelayOff3", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
-			state "off", label: '${name}', action: "RelayOn3", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
-            
-		}
-		standardTile("relay4", "device.relay4", canChangeIcon: true, canChangeBackground: true) {
-			state "on", label: '${name}', action: "RelayOff4", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
-			state "off", label: '${name}', action: "RelayOn4", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
-            
-		}
-		standardTile("relay5", "device.relay5", canChangeIcon: true, canChangeBackground: true) {
-			state "on", label: '${name}', action: "RelayOff5", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
-			state "off", label: '${name}', action: "RelayOn5", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
-            
-		}
-		standardTile("relay6", "device.relay6", canChangeIcon: true, canChangeBackground: true) {
-			state "on", label: '${name}', action: "RelayOff6", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
-			state "off", label: '${name}', action: "RelayOn6", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
-            
-		}
-		standardTile("relay7", "device.relay7", canChangeIcon: true, canChangeBackground: true) {
-			state "on", label: '${name}', action: "RelayOff7", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
-			state "off", label: '${name}', action: "RelayOn7", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
-            
-		}
-		standardTile("relay8", "device.relay8", canChangeIcon: true, canChangeBackground: true) {
-			state "on", label: '${name}', action: "RelayOff8", icon: "st.switches.switch.on", backgroundColor: "#79b821",  nextState:"off"
-			state "off", label: '${name}', action: "RelayOn8", icon: "st.switches.switch.off", backgroundColor: "#ffffff",  nextState:"on"
-            
-		}*/
-        
+        standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
+        }
         
 		main "relay1"
-		details(["relay1", "relay2", "relay3", "relay4", "relay5", "relay6", "relay7", "relay8"])
+		details(["relay1", "relay2", "relay3", "relay4", "relay5", "relay6", "relay7", "relay8", "refresh"])
 	}
     simulator {
         status "on":  "catchall: 0104 0000 01 01 0040 00 0A21 00 00 0000 0A 00 0A6F6E"
@@ -162,53 +134,111 @@ metadata {
 
 
 def RelayOn1() {
-	zigbee.smartShield(text: "relayon1").format()
+	log.debug "Turning on relay 1"
+	String msg = "relayon1:"+settings.autorelayoff1
+	zigbee.smartShield(text: msg).format()
 } 
 def RelayOff1() {
+	log.debug "Turning off relay 1"
 	zigbee.smartShield(text: "relayoff1").format()
 }
 def RelayOn2() {
-    zigbee.smartShield(text: "relayon2").format()
+	log.debug "Turning on relay 2"
+	String msg = "relayon2:"+settings.autorelayoff2
+    zigbee.smartShield(text: msg).format()
 } 
 def RelayOff2() {
+	log.debug "Turning off relay 2"
 	zigbee.smartShield(text: "relayoff2").format()
 }
 def RelayOn3() {
-    zigbee.smartShield(text: "relayon3").format()
+	log.debug "Turning on relay 3"
+	String msg = "relayon3:"+settings.autorelayoff3
+    zigbee.smartShield(text: msg).format()
 } 
 def RelayOff3() {
+	log.debug "Turning off relay 3"
 	zigbee.smartShield(text: "relayoff3").format()
 }
 def RelayOn4() {
-    zigbee.smartShield(text: "relayon4").format()
+	log.debug "Turning on relay 4"
+	String msg = "relayon4:"+settings.autorelayoff4
+    zigbee.smartShield(text: msg).format()
 } 
 def RelayOff4() {
+	log.debug "Turning off relay 4"
 	zigbee.smartShield(text: "relayoff4").format()
 }
 def RelayOn5() {
-    zigbee.smartShield(text: "relayon5").format()
+	log.debug "Turning on relay 5"
+	String msg = "relayon5:"+settings.autorelayoff5
+    zigbee.smartShield(text: msg).format()
 } 
 def RelayOff5() {
+	log.debug "Turning off relay 5"
 	zigbee.smartShield(text: "relayoff5").format()
 }
 def RelayOn6() {
-    zigbee.smartShield(text: "relayon6").format()
+	log.debug "Turning on relay 6"
+	String msg = "relayon6:"+settings.autorelayoff6
+    zigbee.smartShield(text: msg).format()
 } 
 def RelayOff6() {
+	log.debug "Turning off relay 6"
 	zigbee.smartShield(text: "relayoff6").format()
 }
 def RelayOn7() {
-    zigbee.smartShield(text: "relayon7").format()
+	log.debug "Turning on relay 7"
+	String msg = "relayon7:"+settings.autorelayoff7
+    zigbee.smartShield(text: msg).format()
 } 
 def RelayOff7() {
+	log.debug "Turning off relay 7"
 	zigbee.smartShield(text: "relayoff7").format()
 }
 def RelayOn8() {
-    zigbee.smartShield(text: "relayon8").format()
+	log.debug "Turning on relay 8"
+	String msg = "relayon8:"+settings.autorelayoff8
+    zigbee.smartShield(text: msg).format()
 } 
 def RelayOff8() {
+	log.debug "Turning off relay 8"
 	zigbee.smartShield(text: "relayoff8").format()
 }
+def Push1() {
+	log.debug "Pushing relay 1"
+	zigbee.smartShield(text: "push1").format()
+}
+def Push2() {
+	log.debug "Pushing relay 2"
+	zigbee.smartShield(text: "push2").format()
+}
+def Push3() {
+	log.debug "Pushing relay 3"
+	zigbee.smartShield(text: "push3").format()
+}
+def Push4() {
+	log.debug "Pushing relay 4"
+	zigbee.smartShield(text: "push4").format()
+}
+def Push5() {
+	log.debug "Pushing relay 5"
+	zigbee.smartShield(text: "push5").format()
+}
+def Push6() {
+	log.debug "Pushing relay 6"
+	zigbee.smartShield(text: "push6").format()
+}
+def Push7() {
+	log.debug "Pushing relay 7"
+	zigbee.smartShield(text: "push7").format()
+}
+def Push8() {
+	log.debug "Pushing relay 8"
+	zigbee.smartShield(text: "push8").format()
+}
+
+
 def poll()
 {
 	log.debug "Poll - getting state of all relays"
@@ -219,6 +249,7 @@ def refresh()
 	log.debug "Refresh - getting state of all relays"
     zigbee.smartShield(text: "relaystateall").format()
 }
+
 
  
 // Arduino event handlers
@@ -235,6 +266,9 @@ def parse(String description) {
     if (value == "relayoff1") {
 	   	createEvent (name:"relay1", value:"off", isStateChange:true)
     } else 
+    if (value == "relayautooff1") {
+	   	sendEvent (name: "alert", value: "Relay auto switchoff")
+    } else    
     if (value == "relayon2") {
 	   	createEvent (name:"relay2", value:"on", isStateChange:true)
     } else
@@ -276,9 +310,6 @@ def parse(String description) {
     } else
     if (value == "relayoff8") {
 	   	createEvent (name:"relay8", value:"off", isStateChange:true)
-    } 
+    }
 }
-
-
-
 
