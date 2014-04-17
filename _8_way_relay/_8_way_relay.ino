@@ -128,11 +128,19 @@ void messageCallout(String message)
       DEBUG_PRINTLN("' ");
     }
   #endif
+  
+  // Get the relay and optional auto-off numbers
+  int firstIndex = message.indexOf(':');
+  int secondIndex = message. indexOf(':', firstIndex+1);
+  int relay = message.substring(firstIndex+1, secondIndex).toInt();
+  int autoOffMinutes = message.substring(secondIndex+1).toInt();
+  
+  DEBUG_PRINT ("Relay=");
+  DEBUG_PRINTLN (relay);
 
   if (message.startsWith ("push"))
   {
     // Get and check the relay number
-    int relay = message.substring(4).toInt();
     if ((relay<1) | (relay>8))
     {
       DEBUG_PRINTLN("Invalid relay number sent");
@@ -147,11 +155,9 @@ void messageCallout(String message)
   else  if (message.startsWith ("relayon"))
   {
     // Turn on the relay
-    int relay = message.substring(7,8).toInt();
     changeRelayState(relay, RELAY_ON);
     
     // Get the auto-off time
-    int autoOffMinutes = message.substring(9).toInt();
     DEBUG_PRINT("Auto off after ");
     DEBUG_PRINT (autoOffMinutes);
     DEBUG_PRINTLN(" minutes");
@@ -163,7 +169,6 @@ void messageCallout(String message)
   else if (message.startsWith ("relayoff"))
   {
     // Turn off the relay
-    int relay = message.substring(8).toInt();
     changeRelayState(relay, RELAY_OFF);
   }  
   else if (message.startsWith ("relaystateall"))

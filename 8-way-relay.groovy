@@ -135,107 +135,107 @@ metadata {
 
 def RelayOn1() {
 	log.debug "Turning on relay 1"
-	String msg = "relayon1:"+settings.autorelayoff1
+	String msg = "relayon:1:"+settings.autorelayoff1
 	zigbee.smartShield(text: msg).format()
 } 
 def RelayOff1() {
 	log.debug "Turning off relay 1"
-	zigbee.smartShield(text: "relayoff1").format()
+	zigbee.smartShield(text: "relayoff:1").format()
 }
 def RelayOn2() {
-	log.debug "Turning on relay 2"
-	String msg = "relayon2:"+settings.autorelayoff2
+	log.debug "Turning on: relay 2"
+	String msg = "relayon:2:"+settings.autorelayoff2
     zigbee.smartShield(text: msg).format()
 } 
 def RelayOff2() {
 	log.debug "Turning off relay 2"
-	zigbee.smartShield(text: "relayoff2").format()
+	zigbee.smartShield(text: "relayoff:2").format()
 }
 def RelayOn3() {
 	log.debug "Turning on relay 3"
-	String msg = "relayon3:"+settings.autorelayoff3
+	String msg = "relayon:3:"+settings.autorelayoff3
     zigbee.smartShield(text: msg).format()
 } 
 def RelayOff3() {
 	log.debug "Turning off relay 3"
-	zigbee.smartShield(text: "relayoff3").format()
+	zigbee.smartShield(text: "relayoff:3").format()
 }
 def RelayOn4() {
 	log.debug "Turning on relay 4"
-	String msg = "relayon4:"+settings.autorelayoff4
+	String msg = "relayon:4:"+settings.autorelayoff4
     zigbee.smartShield(text: msg).format()
 } 
 def RelayOff4() {
 	log.debug "Turning off relay 4"
-	zigbee.smartShield(text: "relayoff4").format()
+	zigbee.smartShield(text: "relayoff:4").format()
 }
 def RelayOn5() {
 	log.debug "Turning on relay 5"
-	String msg = "relayon5:"+settings.autorelayoff5
+	String msg = "relayon:5:"+settings.autorelayoff5
     zigbee.smartShield(text: msg).format()
 } 
 def RelayOff5() {
 	log.debug "Turning off relay 5"
-	zigbee.smartShield(text: "relayoff5").format()
+	zigbee.smartShield(text: "relayoff:5").format()
 }
 def RelayOn6() {
 	log.debug "Turning on relay 6"
-	String msg = "relayon6:"+settings.autorelayoff6
+	String msg = "relayon:6:"+settings.autorelayoff6
     zigbee.smartShield(text: msg).format()
 } 
 def RelayOff6() {
 	log.debug "Turning off relay 6"
-	zigbee.smartShield(text: "relayoff6").format()
+	zigbee.smartShield(text: "relayoff:6").format()
 }
 def RelayOn7() {
 	log.debug "Turning on relay 7"
-	String msg = "relayon7:"+settings.autorelayoff7
+	String msg = "relayon:7:"+settings.autorelayoff7
     zigbee.smartShield(text: msg).format()
 } 
 def RelayOff7() {
 	log.debug "Turning off relay 7"
-	zigbee.smartShield(text: "relayoff7").format()
+	zigbee.smartShield(text: "relayoff:7").format()
 }
 def RelayOn8() {
 	log.debug "Turning on relay 8"
-	String msg = "relayon8:"+settings.autorelayoff8
+	String msg = "relayon:8:"+settings.autorelayoff8
     zigbee.smartShield(text: msg).format()
 } 
 def RelayOff8() {
 	log.debug "Turning off relay 8"
-	zigbee.smartShield(text: "relayoff8").format()
+	zigbee.smartShield(text: "relayoff:8").format()
 }
 def Push1() {
 	log.debug "Pushing relay 1"
-	zigbee.smartShield(text: "push1").format()
+	zigbee.smartShield(text: "push:1").format()
 }
 def Push2() {
 	log.debug "Pushing relay 2"
-	zigbee.smartShield(text: "push2").format()
+	zigbee.smartShield(text: "push:2").format()
 }
 def Push3() {
 	log.debug "Pushing relay 3"
-	zigbee.smartShield(text: "push3").format()
+	zigbee.smartShield(text: "push:3").format()
 }
 def Push4() {
 	log.debug "Pushing relay 4"
-	zigbee.smartShield(text: "push4").format()
+	zigbee.smartShield(text: "push:4").format()
 }
 def Push5() {
 	log.debug "Pushing relay 5"
-	zigbee.smartShield(text: "push5").format()
+	zigbee.smartShield(text: "push:5").format()
 }
 def Push6() {
 	log.debug "Pushing relay 6"
-	zigbee.smartShield(text: "push6").format()
+	zigbee.smartShield(text: "push:6").format()
 }
 def Push7() {
 	log.debug "Pushing relay 7"
-	zigbee.smartShield(text: "push7").format()
+	zigbee.smartShield(text: "push:7").format()
 }
 def Push8() {
 	log.debug "Pushing relay 8"
-	zigbee.smartShield(text: "push8").format()
+	zigbee.smartShield(text: "push:8").format()
 }
 
 
@@ -312,4 +312,5 @@ def parse(String description) {
 	   	createEvent (name:"relay8", value:"off", isStateChange:true)
     }
 }
+
 
